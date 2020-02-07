@@ -1,0 +1,172 @@
+---
+title: "Working with return()"
+output:
+  html_document:
+    df_print: paged
+---
+Unless the purpose is to report logs, `return()` is the preferred method for the output of a function because the results can be assigned to other variables or as inputs of other functions. `return()` implicitly ends a function. Lines after `return()` does not run. This means you can only return ONE object from a function.
+```{r}
+test1 <- function(){
+  print(1)
+  print(2)
+  return(3)
+  print(4) #will not print
+  return(5) #will not return
+}
+
+test1()
+
+WhatCanBeSaved <- test1() #print() shows up on screen whenever the fucntion is executed
+WhatCanBeSaved #but only the object passed by return() can be saved/assigned
+WhatCanBeCalculated <- sum(test1()) #expected to be 6 if the number 1 to 3 are taken
+WhatCanBeCalculated #only the object passed by return() taken as argument
+```
+\
+True for `for loop` too. A function stops after the first time `return()` is executed
+```{r}
+test2 <- function(){
+  for (i in 1:5L){
+    return(i) #the loop only run 1 iteration
+  }
+}
+
+test2()
+
+#If want to return results from every iteration of a `for loop`, you need to save it to an object
+test3 <- function(){
+  output <- c()
+  for (i in 1:5L){
+    output <- c(output, i) #append i as the last element of ouput; alternatively you can use `append()`
+  }
+  return(output)
+}
+
+test3()
+```
+\
+There are some tricks to write concise codes for outputing results in `for loop`
+```{r}
+#claim "empty" objects for saving outputs
+V1 <- c() #empty vector
+V1_char <- character() #empty vector of character
+V1_double <- double() #empty vecotr of double
+V1_logic <- logical() #empty vector of Boolean
+V2 <- list() #empty list
+V3 <- data.frame() #empty data.frame
+```
+\
+Use `V1 <- c(V1, NewElement)` to append an element to the output `vector`. Useful when `i` represents actual values.
+```{r}
+double.vector.append <- function(x){
+  output <- c()
+  for (i in x){
+    output <- c(output, i*2)
+  }
+  return(output)
+}
+
+double.vector.append(c(1,5,6))
+```
+\
+Use `V1[i] <- NewElement` to assign a value to new indice. Useful when `i` is the round number of iterations.
+```{r}
+double.vector.index <- function(x){
+  output <- c()
+  for (i in 1L:length(x)){
+    output[i] <- x[i]*2
+  }
+  return(output)
+}
+
+double.vector.index(c(1,5,6))
+```
+\
+Uuse `V2 <- c(V2, list(NewElement))` to append an element to the output `list`.
+```{r}
+##find factors of a number
+find.factors <- function(x){
+  which(sapply(1:x, FUN=function(y) {x %% y == 0}))
+}
+
+##find factors of several numbers
+multi.factors.append <- function(x){
+  output <- list()
+  for (i in x){
+    output <- c(output, list(find.factors(i)))
+  }
+  return(output)
+}
+
+multi.factors.append(c(6,10,12))
+```
+\
+Use `V2[[i]] <- NewElement` to  assign value to new indice of the output `list`.
+```{r}
+multi.factors.index <- function(x){
+  output <- list()
+  for (i in 1L:length(x)){
+    output[[i]] <- find.factors(x[i])
+  }
+  return(output)
+}
+
+multi.factors.index(c(6,10,12))
+```
+\
+Use `V3 <- rbind(V3, data.frame(X1 = x1, X2 = x2...))` to append a new row to the output `data.frame`.
+```{r}
+##get squares and cubes of several numbers
+powers.vector.append <- function(x){
+  output <- data.frame()
+  for (i in x){
+    output <-
+      rbind(output, data.frame(base = i,
+                               square = i^2,
+                               cube = i^3))
+  }
+  return(output)
+}
+
+powers.vector.append(c(6,10,12))
+```
+\
+Use `V3[i,"X1"] <- x1` to assign value to new rows
+```{r, error=TRUE}
+##R does not allow creating new variables when indexing multiple columns, so the most concise way does not work. This is one of the most tricky behaviors of R.
+powers.vector.index1 <- function(x){#this will not work
+  output <- data.frame()
+  for (i in 1L:length(x)){
+    base <- x[i]
+    output[i, c("base", "square", "cube")] <- c(base,base^2,base^3) #cannot create new variables with c() indexing
+  }
+  return(output)
+}
+
+powers.vector.index1(c(6,10,12))
+
+
+powers.vector.index2 <- function(x){
+  output <- data.frame()
+  for (i in 1L:length(x)){
+    base <- x[i]
+    output[i, "base"] <- base #assigning value to single new variable is allowed
+    output[i, "square"] <- base^2
+    output[i, "cube"] <- base^3
+  }
+  return(output)
+}
+
+powers.vector.index2(c(6,10,12))
+
+
+powers.vector.index3 <- function(x){
+  output <- data.frame(base=integer(), square=integer(), cube=integer())#this defines the columns names
+  for (i in 1L:length(x)){
+    base <- x[i]
+    output[i, c("base", "square", "cube")] <- c(base,base^2,base^3) #assigning multiple values to existing variables is allowed
+  }
+  return(output)
+}
+
+powers.vector.index3(c(6,10,12))
+```

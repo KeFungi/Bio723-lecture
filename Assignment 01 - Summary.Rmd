@@ -1,0 +1,42 @@
+---
+title: "Assignment 01 - selected keys"
+output:
+  html_document:
+    df_print: paged
+---
+
+####2b. Getting last three elements
+```{r}
+health.expenditures <- c(864, 320, 239, 882, 472, 72, 60, 607, 3984, 4668, 47, 180)
+# method 1
+l <- length(health.expenditures)
+health.expenditures[(l-2):l]
+
+# method 2
+tail(health.expenditures, 3)
+
+#method 3
+rev(health.expenditures)[1:3]
+rev(rev(health.expenditures)[1:3]) #if the order matters
+```
+
+####6a. Indexing phone book
+```{r}
+#create a phone book
+john <- list(fname = "John", lname = "Smithee", age = 24,
+             phone = "919-555-1234")
+jane <- list(fname = "Jane", lname = "Doe", age = 39,
+             phone = "919-555-4321")
+jack <- list(fname = "Jack", lname = "Indabox", age = 13,
+             phone = NA)
+jill <- list(fname = "Jill", lname = "Bopeep", age = 18,
+             phone = "919-555-1243")
+
+phone.book <- list(john, jane, jack, jill)
+
+#index to the second person
+phone.book[[2]]
+
+#index to `fname` and `lname` of the second person
+phone.book[[2]][c("fname","lname")]
+typeof(phone.book[[2]][c("fname","lname")])
